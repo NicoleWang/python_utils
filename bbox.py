@@ -1,3 +1,5 @@
+import sys, os, string
+import cPickle
 import numpy as np
 
 def bbox_overlaps(boxes, query_boxes):
@@ -39,3 +41,18 @@ def bbox_overlaps(boxes, query_boxes):
                     )
                     overlaps[n, k] = iw * ih / ua
     return overlaps
+
+def trans_txt_to_pkl(indir, namelist, outpath):
+    with open(namelist, 'r') as f:
+        names = [x.strip() for x in f.readlines()]
+    all_boxes = []
+    for name in names:
+        txtpath = os.path.join(indir, name + ".txt")
+        with open(txtpath, 'r') as f:
+            lines = [[string.atoi(y) for y in x.strip().split()]
+                    for x in f.readlines()]
+        boxes = np.array(lines)
+        all_boxes.append(boxes)
+    with open(outpath, 'wb') as f:
+        cPickle.dump(all_boxes, f, cPickle.HIGHEST_PROTOCOL)
+
