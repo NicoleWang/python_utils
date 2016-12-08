@@ -5,19 +5,7 @@ import string
 import cPickle
 from bbox import bbox_overlaps
 
-
-
-if __name__ == '__main__':
-    if len(sys.argv) != 4:
-        print "Usage: evaluate_text.py gt.pkl res.pkl outfile"
-        exit()
-
-    gtpath  = sys.argv[1]
-    respath = sys.argv[2]
-    outfile = sys.argv[3]
-    area_thresh = 0.1
-    #print os.path.splitext(gtpath)[1]
-    #print os.path.splitext(respath)[1]
+def eval_pr(gtpath, respath, area_thresh=0.1):
     if os.path.splitext(gtpath)[1] != '.pkl':
         print "gt must be in cPickle format\n call trans_txt_to_pkl first"
         exit()
@@ -35,9 +23,12 @@ if __name__ == '__main__':
     res_char_num = 0;
     valid_gt_char_num = 0;
     valid_res_char_num = 0;
-    #print gt_boxes[1]
+
     for i in xrange(0, len(gt_boxes)):
         print "processing %dth test sample" % i
+        ## gt: left top width height
+        ## res: left top right bottom
+        ## Make gt and res with same format
         gt = gt_boxes[i]
         gt[:, 2] = gt[:, 0] + gt[:, 2] - 1
         gt[:, 3] = gt[:, 1] + gt[:, 3] - 1
@@ -59,4 +50,21 @@ if __name__ == '__main__':
 
     recall = valid_gt_char_num * 1.0 / gt_char_num
     precision = valid_res_char_num * 1.0 / res_char_num
+    return (recall, precision)
+    #print "recall: %f \n precision: %f" %(recall, precision)
+
+if __name__ == '__main__':
+    if len(sys.argv) != 3:
+        print "Usage: evaluate_text.py gt.pkl res.pkl"
+        exit()
+
+    gtpath  = sys.argv[1]
+    respath = sys.argv[2]
+    #outfile = sys.argv[3]
+
+    recall, precision = eval_pr(gtpath, respath);
+    #area_thresh = 0.1
+    #print os.path.splitext(gtpath)[1]
+    #print os.path.splitext(respath)[1]
+
     print "recall: %f \n precision: %f" %(recall, precision)
